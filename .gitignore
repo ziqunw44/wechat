@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/vendor/
+
+# Build / binary
+/bin/
+/dist/
+/build/
+*.a
+
+# Env & secrets（勿提交真实密钥）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs & temp
+*.log
+/tmp/
+
+# Frontend（根目录若另有前端构建产物）
+web/chat-server/node_modules/
+web/chat-server/dist/

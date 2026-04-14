@@ -1,20 +1,30 @@
 package model
 
 import (
-	"gorm.io/plugin/soft_delete"
+	"database/sql"
 	"time"
 )
 
 type Message struct {
-	ID          int32                 `json:"id" gorm:"primarykey"`
-	CreatedAt   time.Time             `json:"createAt"`
-	UpdatedAt   time.Time             `json:"updatedAt"`
-	DeletedAt   soft_delete.DeletedAt `json:"deletedAt"`
-	FromUserId  int32                 `json:"fromUserId" gorm:"index"`
-	ToUserId    int32                 `json:"toUserId" gorm:"index;comment:'user/group'"`
-	Content     string                `json:"content" gorm:"type:varchar(2500)"`
-	MessageType int16                 `json:"messageType" gorm:"comment:'1user/2group'"`
-	ContentType int16                 `json:"contentType" gorm:"comment:'消息内容类型：1文字 2.普通文件 3.图片 4.音频 5.视频 6.语音聊天 7.视频聊天'"`
-	Pic         string                `json:"pic" gorm:"type:text;comment:'缩略图"`
-	Url         string                `json:"url" gorm:"type:varchar(350);comment:'文件或者图片地址'"`
+	Id         int64     `gorm:"column:id;primaryKey;comment:自增id"`
+	Uuid       string    `gorm:"column:uuid;uniqueIndex;type:char(20);not null;comment:消息uuid"`
+	SessionId  string    `gorm:"column:session_id;index;type:char(20);not null;comment:会话uuid"`
+	Type       int8      `gorm:"column:type;not null;comment:消息类型，0.文本，1.语音，2.文件，3.通话"` // 通话不用存消息内容或者url
+	Content    string    `gorm:"column:content;type:TEXT;comment:消息内容"`
+	Url        string    `gorm:"column:url;type:char(255);comment:消息url"`
+	SendId     string    `gorm:"column:send_id;index;type:char(20);not null;comment:发送者uuid"`
+	SendName   string    `gorm:"column:send_name;type:varchar(20);not null;comment:发送者昵称"`
+	SendAvatar string    `gorm:"column:send_avatar;type:varchar(255);not null;comment:发送者头像"`
+	ReceiveId  string    `gorm:"column:receive_id;index;type:char(20);not null;comment:接受者uuid"`
+	FileType   string    `gorm:"column:file_type;type:char(10);comment:文件类型"`
+	FileName   string    `gorm:"column:file_name;type:varchar(50);comment:文件名"`
+	FileSize   string    `gorm:"column:file_size;type:char(20);comment:文件大小"`
+	Status     int8      `gorm:"column:status;not null;comment:状态，0.未发送，1.已发送"`
+	CreatedAt  time.Time `gorm:"column:created_at;not null;comment:创建时间"`
+	SendAt     sql.NullTime `gorm:"column:send_at;comment:发送时间"`
+	AVdata     string    `gorm:"column:av_data;comment:通话传递数据"`
+}
+
+func (Message) TableName() string {
+	return "message"
 }

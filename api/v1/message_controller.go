@@ -1,31 +1,49 @@
 package v1
 
 import (
-	"net/http"
-
-	"chat-room/internal/service"
-	"chat-room/pkg/common/request"
-	"chat-room/pkg/common/response"
-	"chat-room/pkg/global/log"
-
 	"github.com/gin-gonic/gin"
+	"wechat/internal/dto/request"
+	"wechat/internal/service/gorm"
+	"wechat/pkg/constants"
+	"net/http"
 )
 
-// 获取消息列表
-func GetMessage(c *gin.Context) {
-	log.Logger.Info(c.Query("uuid"))
-	var messageRequest request.MessageRequest
-	err := c.BindQuery(&messageRequest)
-	if nil != err {
-		log.Logger.Error("bindQueryError", log.Any("bindQueryError", err))
-	}
-	log.Logger.Info("messageRequest params: ", log.Any("messageRequest", messageRequest))
-
-	messages, err := service.MessageService.GetMessages(messageRequest)
-	if err != nil {
-		c.JSON(http.StatusOK, response.FailMsg(err.Error()))
+// GetMessageList 获取聊天记录
+func GetMessageList(c *gin.Context) {
+	var req request.GetMessageListRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
 		return
 	}
+	message, rsp, ret := gorm.MessageService.GetMessageList(req.UserOneId, req.UserTwoId)
+	JsonBack(c, message, ret, rsp)
+}
 
-	c.JSON(http.StatusOK, response.SuccessMsg(messages))
+// GetGroupMessageList 获取群聊消息记录
+func GetGroupMessageList(c *gin.Context) {
+	var req request.GetGroupMessageListRequest
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, rsp, ret := gorm.MessageService.GetGroupMessageList(req.GroupId)
+	JsonBack(c, message, ret, rsp)
+}
+
+// UploadAvatar 上传头像
+func UploadAvatar(c *gin.Context) {
+	message, ret := gorm.MessageService.UploadAvatar(c)
+	JsonBack(c, message, ret, nil)
+}
+
+// UploadFile 上传头像
+func UploadFile(c *gin.Context) {
+	message, ret := gorm.MessageService.UploadFile(c)
+	JsonBack(c, message, ret, nil)
 }
